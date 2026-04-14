@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
     <title>титульный лист</title>
     <style>
         * {
@@ -33,6 +33,19 @@
                               radial-gradient(circle at 85% 70%, rgba(160, 120, 80, 0.06) 1.8%, transparent 2%);
             background-size: 48px 48px, 38px 38px;
             pointer-events: none;
+        }
+
+        .user-name {
+            position: absolute;
+            top: 1rem;
+            right: 1.5rem;
+            z-index: 3;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 0.5rem 1rem;
+            border-radius: 1rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            font-size: 1rem;
+            font-weight: 500;
         }
 
         .hero {
@@ -87,6 +100,8 @@
     </style>
 </head>
 <body>
+    <div class="user-name">Имя пользователя</div>
+
     <div class="hero">
         <h1>магазин одежды</h1>
         <div class="tagline">*описание магазина*</div>

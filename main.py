@@ -21,7 +21,7 @@ def start(host):
         except: pass
 
 if __name__ == "__main__":
-    host = socket.gethostname()
+    host = "ardor"
     print(host)
     port = 80
     server = socket.socket()

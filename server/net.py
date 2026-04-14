@@ -3,6 +3,7 @@ import os
 import datetime as dt
 import json
 import server.autorization as autorization
+import hashlib
 
 
 class Net:
@@ -13,6 +14,11 @@ class Net:
     def date(self, str=True):
         dat = dt.datetime.now()
         return dat.isoformat(sep=" ") if str else dat
+
+    def hasher(mes):
+        hsh = hashlib.sha256(mes).digest(16)
+        content = f"HTTP/1.1 200 OK\r\nContent-Type: text/txt\r\nContent-Length:{hsh}\r\nConnection: close\r\n\r\n"
+        return content + hsh
     
     def printl(*args, end="\n"):
         if args[1]:
@@ -53,65 +59,34 @@ class Net:
         content = f"HTTP/1.1 {code_ask} OK\r\nContent-Type: text/html\r\nContent-Length:{len(string)}\r\n\r\n"
         return content.encode("utf-8") + string
     
-    def listing(self, path):
-        lst = {"dir":[], "file":[]}
-        for i in os.listdir(path):
-            if os.path.isfile(path + "/" + i):
-                lst["file"] += [i]
-                continue
-            if os.path.isdir(path + "/" + i):
-                lst["dir"] += [i]
-                continue
-        string = ""
-        for i in lst:
-            for k in lst[i]:
-                add = ""
-                if i == "dir":
-                    string += f"<div class=\"features\">\n<a class=\"feature\" href=\"{self.href}{("listing/" + path[5:] + "/" + quote(k).replace("//", "/").replace("%28", "(").replace("%29", ")"))}\">\n<img class=\"icon\" src=\"{self.href}img/icons/folder.png\">\n<p>{k}</p>\n</a>\n</div>\n"
-                else:
-                    if k.split(".")[-1] == "mp3":
-                        add = f"<a class=\"feature-play\" href=\"{self.href}media.html?&{quote(path[5:]) + "/" + k}\"><img class=\"icon\" src=\"{self.href}img/icons/play.png\"></a>\n"
-                    string += f"<div class=\"features\">\n<a class=\"feature\" href=\"{self.href}{(path[5:] + "/" + quote(k).replace("%28", "(").replace("%29", ")"))}\">\n<img class=\"icon\" src=\"{self.href}img/icons/{self.get_icon(k.split(".")[-1])}.png\">\n<p><p>{k.replace("%20", " ")}</p>\r\n</a>{add}\n</div>\n"
-        file = open(self.chest + "/listing.html", "r", encoding="utf-8")
-        content = file.read()
-        file.close()
-        content = content.replace(".add_data.", string).replace(".title.", path)
-        content = content.encode("utf-8")
-        http_ask = f"HTTP/1.1 200 OK\nContent-Type: text/html\nContent-Length:{len(content)}\n\n"
-        content = http_ask.encode("utf-8") + content
-        return content
-    
     @staticmethod
     def get_icon(exp):
         return {"jpeg": "image", "ico": "image", "jpg": "image", "html": "html", "mp3": "sound", "h": "html", "ttf": "font", "png": "image", "mp4":"video"}.get(exp, "unknown")
     
 def show_content(request, adr, host):
     net = Net("data", f"http://{host[0]}/")
-    get_req = request
-    lines = get_req.split(b"\r\n")
+    lines = request.split(b"\r\n")
     method, path, http_v = lines[0].decode().split(" ")
     path = unquote(path)
     path = path.replace("//", "/")
-    rules = autorization.Log_in.authenticator(adr)
     Dpath = path.split("/")
     net.printl(f"{path}{(60 - len(path)) * ' '}| User adress - {adr} | {net.date()} | <{method}>")
+    print(request)
     if method == "POST":
+        print(request)
         if len(lines) > 14:
-            messege = lines[14].decode()
+            messege = lines[-1].decode()
             json_ = json.loads(messege)
             if json_["method"] == "log_in":
-                return autorization.Log_in.log_in(json_, adr)
+                return autorization.Log_in.log_in(json_.get("login"), json_.get("password"))
+            elif json_["method"] == "hash":
+                return Net.hasher(json_.get("text"))
+    coockie = request.split(b"\r\n")[-1]
+    rules = autorization.Log_in.log_in_coockie(coockie)
     if path == "/":
         if rules:
             return net.text("/index/index.html")
         return net.text("/index/index_log.html")
-    elif "listing" == Dpath[0]:
-        if rules == ("admin"):
-            path = "data/" + "/".join(Dpath[1:])
-            if os.path.isdir(path):
-                return net.listing(path)
-        else:
-            return net.text("/authenticator.html")
     elif os.path.isfile(net.chest + path):
         if "." in path:
             exp = Dpath[-1].split(".")[-1]

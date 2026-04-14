@@ -12,15 +12,25 @@ b1.addEventListener("click", h)
 l1.addEventListener("input", r)
 l2.addEventListener("input", r)
 
+function hashString(str) {
+    let hash = 5381;
+    for (let i = 0; i < str.length; i++) {
+        hash = (hash * 33) ^ str.charCodeAt(i);
+    }
+    let hash_ = hash >>> 0;
+    return hash_.toString(16);
+}
+
 async function e()
 {
     let email = l1.value;
-    let pass = l2.value;
+    let pass = await hashString(l2.value);
     let json = {
         login: email,
         password: pass,
         method: "log_in"
     };
+    console.log(pass);
     let response = await fetch("submit",
         {
             method: "POST",
@@ -33,6 +43,7 @@ async function e()
     if (res.succes)
     {
         window.location.href = "/";
+        document.cookie = `${email}\r\n${pass}`
     }
     else
     {
@@ -59,3 +70,4 @@ function h()
         img.src = "icons/open-eye.png";
     }
 }
+
