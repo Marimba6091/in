@@ -81,8 +81,15 @@ def show_content(request, adr, host):
                 return autorization.Log_in.log_in(json_.get("login"), json_.get("password"))
             elif json_["method"] == "hash":
                 return Net.hasher(json_.get("text"))
-    coockie = request.split(b"\r\n")[-1]
-    rules = autorization.Log_in.log_in_coockie(coockie)
+    
+    cookie = b""
+    for i in lines:
+        if b"Cookie: " in i:
+            cookie = i
+            break
+
+    rules = autorization.Log_in.log_in_cookie(cookie)
+    print("rules -", rules)
     if path == "/":
         if rules:
             return net.text("/index/index.html")

@@ -5,6 +5,8 @@ const l2 = document.getElementById("log2");
 const img = document.getElementById("hide-img");
 const t = document.getElementById("errorMessage");
 
+document.cookie = "$login="
+
 let hide = true;
 
 b.addEventListener("click", e)
@@ -12,19 +14,10 @@ b1.addEventListener("click", h)
 l1.addEventListener("input", r)
 l2.addEventListener("input", r)
 
-function hashString(str) {
-    let hash = 5381;
-    for (let i = 0; i < str.length; i++) {
-        hash = (hash * 33) ^ str.charCodeAt(i);
-    }
-    let hash_ = hash >>> 0;
-    return hash_.toString(16);
-}
-
 async function e()
 {
     let email = l1.value;
-    let pass = await hashString(l2.value);
+    let pass = await sha256(l2.value);
     let json = {
         login: email,
         password: pass,
@@ -43,7 +36,8 @@ async function e()
     if (res.succes)
     {
         window.location.href = "/";
-        document.cookie = `${email}\r\n${pass}`
+        document.cookie = `login=${email};`;
+        document.cookie = `password=${pass};`
     }
     else
     {
