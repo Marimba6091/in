@@ -5,30 +5,30 @@ import datetime as dt
 class Log_in:
     @staticmethod
     def log_in_cookie(cookie):
-        print(cookie)
-        coockie_line = cookie.split(b"; ")
+        coockie_line = cookie.split(b";")
         login = ""
         password = ""
         for i in coockie_line:
-            if b"login" in i:
-                login = i.split(b"=")[-1].decode()
+            if b" login" in i:
+                login = i.split(b"=")[1].decode()
         for i in coockie_line:
             if b"password" in i:
                 password = i.split(b"=")[-1].decode()
-        d = f"SELECT email, password_ FROM profiles WHERE email = \'{login}\' AND password_ = \'{password}\'"
-        print(d)
+        d = f"SELECT username, email, password_, rule FROM profiles WHERE email = \'{login}\' AND password_ = \'{password}\'"
         result = dataBase.execute(d)
-        if len(result) == 1:
-            return True
-        return False
+        if not isinstance(result, int):
+            if len(result) == 1:
+                return (login, True, result[0][0], result[0][3])
+        return ("Guest", False, "", "guest")
     
     @staticmethod
     def log_in(email, password):
         if email and password: 
-            d = f"SELECT email, password_ FROM profiles WHERE email = \'{email}\' AND password_ = \'{password}\'"
+            d = f"SELECT email, password_, rule FROM profiles WHERE email = \'{email}\' AND password_ = \'{password}\'"
             result = dataBase.execute(d)
-            if len(result) == 1:
-                return Log_in.return_succes(True)
+            if not isinstance(result, int):
+                if len(result) == 1:
+                    return Log_in.return_succes(True)
         return Log_in.return_succes(False)
     
     @staticmethod
