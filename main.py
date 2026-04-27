@@ -1,7 +1,6 @@
 import socket
 import threading as th
 from server.net import show_content
-from server.net import Net
 
 
 def greet(con, adr, host):

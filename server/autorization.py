@@ -1,6 +1,4 @@
-import json
 import sql.dataBase as dataBase
-import datetime as dt
 
 class Log_in:
     @staticmethod
@@ -14,8 +12,10 @@ class Log_in:
         for i in coockie_line:
             if b"password" in i:
                 password = i.split(b"=")[-1].decode()
-        d = f"SELECT username, email, password_, rule FROM profiles WHERE email = \'{login}\' AND password_ = \'{password}\'"
+        login = login.replace("\'", "").replace("#", "").replace(" ", "")
+        d = f"SELECT username, email, password_, rule FROM profiles WHERE email = '{login}' AND password_ = '{password}'"
         result = dataBase.execute(d)
+        
         if not isinstance(result, int):
             if len(result) == 1:
                 return (login, True, result[0][0], result[0][3])
@@ -23,8 +23,9 @@ class Log_in:
     
     @staticmethod
     def log_in(email, password):
+        email = email.replace("\'", "").replace("#", "").replace(" ", "")
         if email and password: 
-            d = f"SELECT email, password_, rule FROM profiles WHERE email = \'{email}\' AND password_ = \'{password}\'"
+            d = f"SELECT email, password_, rule FROM profiles WHERE email = '{email}' AND password_ = '{password}'"
             result = dataBase.execute(d)
             if not isinstance(result, int):
                 if len(result) == 1:

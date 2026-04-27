@@ -1,4 +1,4 @@
-from urllib.parse import unquote, quote
+from urllib.parse import unquote
 import os
 import datetime as dt
 import json
@@ -15,11 +15,6 @@ class Net:
     def date(self, str=True):
         dat = dt.datetime.now()
         return dat.isoformat(sep=" ") if str else dat
-
-    def hasher(mes):
-        hsh = hashlib.sha256(mes).digest(16)
-        content = f"HTTP/1.1 200 OK\r\nContent-Type: text/txt\r\nContent-Length:{hsh}\r\nConnection: close\r\n\r\n"
-        return content + hsh
     
     def printl(*args, end="\n"):
         if args[1]:
@@ -68,10 +63,6 @@ class Net:
         content = f"HTTP/1.1 {code_ask} OK\r\nContent-Type: text/html\r\nContent-Length:{len(string)}\r\n\r\n"
         return content.encode("utf-8") + string
     
-    @staticmethod
-    def get_icon(exp):
-        return {"jpeg": "image", "ico": "image", "jpg": "image", "html": "html", "mp3": "sound", "h": "html", "ttf": "font", "png": "image", "mp4":"video"}.get(exp, "unknown")
-    
 def show_content(request, adr, host):
     net = Net("data/ftp", "data", f"http://{host[0]}/")
     lines = request.split(b"\r\n")
@@ -79,24 +70,19 @@ def show_content(request, adr, host):
     path = unquote(path)
     path = path.replace("//", "/")
     Dpath = path.split("/")
-    net.printl(f"{path}{(60 - len(path)) * ' '}| User adress - {adr} | {net.date()} | <{method}>")
     if method == "POST":
         if len(lines) > 14:
             messege = lines[-1].decode()
             json_ = json.loads(messege)
             if json_["method"] == "log_in":
                 return autorization.Log_in.log_in(json_.get("login"), json_.get("password"))
-            elif json_["method"] == "hash":
-                return Net.hasher(json_.get("text"))
-    
     cookie = b""
     for i in lines:
         if b"Cookie: " in i:
             cookie = i
             break
-
-    rules = autorization.Log_in.log_in_cookie(cookie)
-
+    rules = autorization.Log_in.log_in_cookie(cookie)    
+    net.printl(f"{path}{(60 - len(path)) * ' '}| User adress - {adr} | {net.date()} | <{method}>")
     if path == "/":
         if rules[1]:
             return net.text("/index/index.html", is_ftp=False)
